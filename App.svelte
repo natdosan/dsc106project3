@@ -2,44 +2,71 @@
   import { onMount } from 'svelte';
   import mapboxgl from 'mapbox-gl';
 
-  // Your Mapbox access token
   mapboxgl.accessToken = 'pk.eyJ1IjoibmF0ZG9zYW4iLCJhIjoiY2xza3huODg4MDh1ZzJpcDVoOTJ1eWFqayJ9.hvQnPf9rwTCV4aok1j7xJA';
 
   onMount(() => {
-    const shanghai = {
-      lng: 121.4737,
-      lat: 31.2304,
-      ridershipToPopulationRatio: '0.416' // Calculated previously
-    };
-
-    const newYork = {
-      lng: -74.0060,
-      lat: 40.7128,
-      ridershipToPopulationRatio: '0.238' // Calculated previously
-    };
-
-    const mapShanghai = new mapboxgl.Map({
-      container: 'map-shanghai',
+    // Initialize the map for Tokyo with an increased zoom level
+    const mapTokyo = new mapboxgl.Map({
+      container: 'map-tokyo', // Make sure to update the container ID
       style: 'mapbox://styles/mapbox/streets-v11',
-      center: [shanghai.lng, shanghai.lat],
-      zoom: 12
+      center: [139.6917, 35.6895], // Tokyo coordinates
+      zoom: 12 // Adjust the zoom level as needed
     });
 
-    new mapboxgl.Marker()
-      .setLngLat([shanghai.lng, shanghai.lat])
-      .setPopup(new mapboxgl.Popup().setText(`Ridership to Population Ratio: ${shanghai.ridershipToPopulationRatio}`))
-      .addTo(mapShanghai);
+    mapTokyo.on('load', () => {
+      mapTokyo.addSource('tokyo-railways', {
+        type: 'geojson',
+        // Assuming Tokyo.geojson is in the public folder
+        data: '/N02-19_RailroadSection.geojson'
+      });
 
+      mapTokyo.addLayer({
+        id: 'tokyo-railways-layer',
+        type: 'line',
+        source: 'tokyo-railways',
+        layout: {},
+        paint: {
+          'line-color': '#FF0000', // Example: Red lines for railways
+          'line-width': 2
+        }
+      });
+    });
+
+    // Add a marker for Tokyo (optional)
+    new mapboxgl.Marker()
+      .setLngLat([139.6917, 35.6895])
+      .setPopup(new mapboxgl.Popup().setText('Tokyo'))
+      .addTo(mapTokyo);
+
+    // Initialize the map for New York with an increased zoom level
     const mapNewYork = new mapboxgl.Map({
       container: 'map-new-york',
       style: 'mapbox://styles/mapbox/streets-v11',
-      center: [newYork.lng, newYork.lat],
-      zoom: 12
+      center: [-74.0060, 40.7128], // New York coordinates
+      zoom: 12 // Adjust the zoom level as needed
     });
 
+    mapNewYork.on('load', () => {
+      mapNewYork.addSource('nyc-subways', {
+        type: 'geojson',
+        data: '/nyc.geojson' 
+      });
+
+      mapNewYork.addLayer({
+        id: 'nyc-subway-lines',
+        type: 'line',
+        source: 'nyc-subways',
+        paint: {
+          'line-width': 2,
+          'line-color': '#0000FF' // Example: Blue lines for NYC subways
+        }
+      });
+    });
+
+    // Add a marker for New York (optional)
     new mapboxgl.Marker()
-      .setLngLat([newYork.lng, newYork.lat])
-      .setPopup(new mapboxgl.Popup().setText(`Ridership to Population Ratio: ${newYork.ridershipToPopulationRatio}`))
+      .setLngLat([-74.0060, 40.7128])
+      .setPopup(new mapboxgl.Popup().setText('New York'))
       .addTo(mapNewYork);
   });
 </script>
@@ -48,16 +75,16 @@
   .maps-container {
     display: flex;
     justify-content: center;
-    align-items: stretch; /* This ensures that the maps fill the container vertically */
+    align-items: stretch;
   }
 
-  #map-shanghai, #map-new-york {
-    flex: 1; /* This allows each map to take up equal space */
+  #map-tokyo, #map-new-york {
+    flex: 1;
     height: 100vh; /* Adjust the height as needed */
   }
 </style>
 
 <div class="maps-container">
-  <div id="map-shanghai"></div>
+  <div id="map-tokyo"></div> <!-- Update the ID here -->
   <div id="map-new-york"></div>
 </div>
