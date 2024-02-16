@@ -1,6 +1,8 @@
 <script>
   import { onMount } from 'svelte';
   import mapboxgl from 'mapbox-gl';
+  //import mapboxgl.css;
+
 
   mapboxgl.accessToken = 'pk.eyJ1IjoibmF0ZG9zYW4iLCJhIjoiY2xza3huODg4MDh1ZzJpcDVoOTJ1eWFqayJ9.hvQnPf9rwTCV4aok1j7xJA';
 
@@ -11,6 +13,11 @@
       style: 'mapbox://styles/mapbox/streets-v11',
       center: [139.6917, 35.6895], // Tokyo coordinates
       zoom: 12 // Adjust the zoom level as needed
+    });
+
+    const popup = new mapboxgl.Popup({
+      closeButton: false,
+      closeOnClick: false
     });
 
     mapTokyo.on('load', () => {
@@ -30,11 +37,29 @@
           'line-width': 2
         }
       });
+
+      // When the user moves their mouse over the layer, update the
+      // feature state for the feature under the mouse
+      mapTokyo.on('mousemove', 'tokyo-railways-layer', (e) => {
+        console.log("Hovering over:", e.features[0]); // Debugging line
+        if (e.features.length > 0) {
+          const feature = e.features[0];
+          // Set the popup's content based on the feature's properties
+          popup.setLngLat(e.lngLat)
+               .setText(feature.properties.路線名) // Assuming '路線名' is the field name in your GeoJSON
+               .addTo(mapTokyo);
+        }
+      });
+
+      // Reset the cursor style and remove the popup when the mouse leaves the layer
+      mapTokyo.on('mouseleave', 'tokyo-railways-layer', () => {
+        popup.remove();
+      });
     });
 
     // Add a marker for Tokyo (optional)
     new mapboxgl.Marker()
-      .setLngLat([139.6917, 35.6895])
+      .setLngLat([139.7528, 35.6852])
       .setPopup(new mapboxgl.Popup().setText('Tokyo'))
       .addTo(mapTokyo);
 
