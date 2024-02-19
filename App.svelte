@@ -64,23 +64,35 @@
   }
 </script>
 
+
 <style>
-  .maps-container {
+  .container {
     display: flex;
-    justify-content: center;
-    align-items: stretch;
+    height: 100vh;
   }
 
   #map-tokyo {
-    flex: 1;
-    height: 100vh;
+    flex-grow: 1;
+  }
+
+  .side-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  button {
+    margin: 0;
+    padding: 0.5rem 1rem;
   }
 </style>
 
-<button on:click={toggleRailwayVisibility}>
-  {isRailwayVisible ? 'Hide Railway Lines' : 'Show Railway Lines'}
-</button>
-
-<div class="maps-container">
+<div class="container">
   <div id="map-tokyo"></div>
+  <div class="side-panel">
+    <button on:click={toggleRailwayVisibility}>
+      {isRailwayVisible ? 'Hide Railway Lines' : 'Show Railway Lines'}
+    </button>
+  </div>
 </div>
