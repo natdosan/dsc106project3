@@ -24,7 +24,7 @@
     });
 
     // Add railways
-    mapTokyo.on('load', () => {
+    mapTokyo.on('load', async() => {
       mapTokyo.addSource('tokyo-railways', {
         type: 'geojson',
         data: '/N02-19_RailroadSection.geojson'
@@ -54,6 +54,18 @@
       mapTokyo.on('mouseleave', 'tokyo-railways-layer', () => {
         popup.remove();
       });
+
+      const response = await fetch('/stations.json'); 
+      const stationsData = await response.json(); 
+
+      Object.values(stationsData).flat().forEach(station => {
+        const marker = new mapboxgl.Marker()
+          .setLngLat(station.coordinates)
+          .setPopup(new mapboxgl.Popup().setText(`${station.name}: Daily Ridership - ${station.ridership}`))
+          .addTo(mapTokyo);
+
+        stationMarkers.push(marker); // Store the marker reference
+      });
     });
 
     // Impertial Palace
@@ -62,24 +74,6 @@
       .setPopup(new mapboxgl.Popup().setText('Tokyo'))
       .addTo(mapTokyo);
 
-    // Define an array of objects for the highest ridership stations
-    const highestRidershipStations = [
-      { name: 'Shinjuku Station', coordinates: [139.7005, 35.6896], ridership: '3.64 million' },
-      { name: 'Ikebukuro Station', coordinates: [139.7090, 35.7300], ridership: '2.71 million' },
-      { name: 'Shibuya Station', coordinates: [139.70199, 35.658034], ridership: '2.4 million' },
-      { name: 'Yokohama Station', coordinates: [139.6227, 35.4662], ridership: '2.29 million' },
-      { name: 'Tokyo Station', coordinates: [139.7671, 35.6812], ridership: '2.27 million' }
-    ];
-
-    // Iterate over the highestRidershipStations array to create and add markers
-    highestRidershipStations.forEach(station => {
-      const marker = new mapboxgl.Marker()
-        .setLngLat(station.coordinates)
-        .setPopup(new mapboxgl.Popup().setText(`${station.name}: Daily Ridership - ${station.ridership}`))
-        .addTo(mapTokyo);
-
-      stationMarkers.push(marker); // Store the marker reference
-    });
   });
 
   // Reactive Elements
