@@ -6,6 +6,8 @@
 
   let mapTokyo;
   let isRailwayVisible = false;
+  let areStationsVisible = false; // Initial state
+  let stationMarkers = [];
 
   onMount(() => {
     // Tokyo map
@@ -71,16 +73,25 @@
 
     // Iterate over the highestRidershipStations array to create and add markers
     highestRidershipStations.forEach(station => {
-      new mapboxgl.Marker()
+      const marker = new mapboxgl.Marker()
         .setLngLat(station.coordinates)
         .setPopup(new mapboxgl.Popup().setText(`${station.name}: Daily Ridership - ${station.ridership}`))
         .addTo(mapTokyo);
+
+      stationMarkers.push(marker); // Store the marker reference
     });
   });
 
+  // Reactive Elements
   function toggleRailwayVisibility() {
     isRailwayVisible = !isRailwayVisible;
     mapTokyo.setPaintProperty('tokyo-railways-layer', 'line-opacity', isRailwayVisible ? 1 : 0);
+  }
+  function toggleStationVisibility() {
+    areStationsVisible = !areStationsVisible;
+    stationMarkers.forEach(marker => {
+      areStationsVisible ? marker.addTo(mapTokyo) : marker.remove();
+  });
   }
 </script>
 
@@ -117,5 +128,8 @@
   <div class="map-title">Tokyo Live Roads with Metro Lines</div>
   <button class="toggle-button" on:click={toggleRailwayVisibility}>
     {isRailwayVisible ? 'Hide Railway Lines' : 'Show Railway Lines'}
+  </button>
+  <button class="toggle-button" on:click={toggleStationVisibility} style="top: 80px;">
+    {areStationsVisible ? 'Hide Stations' : 'Show Stations'}
   </button>
 </div>
