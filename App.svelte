@@ -8,10 +8,11 @@
   let isRailwayVisible = false;
 
   onMount(() => {
+    // Tokyo map
     mapTokyo = new mapboxgl.Map({
       container: 'map-tokyo',
       style: 'mapbox://styles/mapbox/navigation-night-v1',
-      center: [139.6917, 35.6895],
+      center: [139.7528, 35.6852], // 35.6852° N, 139.7528° E
       zoom: 12
     });
 
@@ -20,6 +21,7 @@
       closeOnClick: false
     });
 
+    // Add railways
     mapTokyo.on('load', () => {
       mapTokyo.addSource('tokyo-railways', {
         type: 'geojson',
@@ -52,10 +54,28 @@
       });
     });
 
+    // Impertial Palace
     new mapboxgl.Marker()
       .setLngLat([139.7528, 35.6852])
       .setPopup(new mapboxgl.Popup().setText('Tokyo'))
       .addTo(mapTokyo);
+
+    // Define an array of objects for the highest ridership stations
+    const highestRidershipStations = [
+      { name: 'Shinjuku Station', coordinates: [139.7005, 35.6896], ridership: '3.64 million' },
+      { name: 'Ikebukuro Station', coordinates: [139.7090, 35.7300], ridership: '2.71 million' },
+      { name: 'Shibuya Station', coordinates: [139.70199, 35.658034], ridership: '2.4 million' },
+      { name: 'Yokohama Station', coordinates: [139.6227, 35.4662], ridership: '2.29 million' },
+      { name: 'Tokyo Station', coordinates: [139.7671, 35.6812], ridership: '2.27 million' }
+    ];
+
+    // Iterate over the highestRidershipStations array to create and add markers
+    highestRidershipStations.forEach(station => {
+      new mapboxgl.Marker()
+        .setLngLat(station.coordinates)
+        .setPopup(new mapboxgl.Popup().setText(`${station.name}: Daily Ridership - ${station.ridership}`))
+        .addTo(mapTokyo);
+    });
   });
 
   function toggleRailwayVisibility() {
@@ -64,35 +84,38 @@
   }
 </script>
 
-
 <style>
-  .container {
-    display: flex;
+  #map-tokyo {
+    position: relative; /* Needed for absolute positioning of children */
     height: 100vh;
   }
 
-  #map-tokyo {
-    flex-grow: 1;
-  }
-
-  .side-panel {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 1rem;
-  }
-
-  button {
-    margin: 0;
+  .toggle-button {
+    position: absolute; /* Position the button over the map */
+    top: 20px; /* Distance from the top of the map container */
+    right: 20px; /* Distance from the right side of the map container */
+    z-index: 10; /* Ensure the button is above map layers and controls */
     padding: 0.5rem 1rem;
+    background-color: white; /* Button background for visibility */
+    border: none; /* Optional: for style */
+    cursor: pointer; /* Optional: change cursor on hover */
+    border-radius: 5px; /* Optional: for rounded corners */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Optional: for a subtle shadow */
+  }
+
+  .map-title {
+    top: 20px; /* Adjust as needed */
+    left: 20px; /* Adjust as needed */
+    background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   }
 </style>
 
-<div class="container">
-  <div id="map-tokyo"></div>
-  <div class="side-panel">
-    <button on:click={toggleRailwayVisibility}>
-      {isRailwayVisible ? 'Hide Railway Lines' : 'Show Railway Lines'}
-    </button>
-  </div>
+<div id="map-tokyo">
+  <div class="map-title">Tokyo Live Roads with Metro Lines</div>
+  <button class="toggle-button" on:click={toggleRailwayVisibility}>
+    {isRailwayVisible ? 'Hide Railway Lines' : 'Show Railway Lines'}
+  </button>
 </div>
